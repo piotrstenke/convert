@@ -62,7 +62,7 @@ async function doConvert (inputFile, inputFormat, outputFormat) {
 }
 
 export default {
-  name: "img2svg",
+  name: "imageToSVG",
   init,
   supportedFormats,
   doConvert
