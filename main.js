@@ -185,8 +185,10 @@ modeToggleButton.addEventListener("click", () => {
   simpleMode = !simpleMode;
   if (simpleMode) {
     modeToggleButton.textContent = "Advanced mode";
+    document.body.style.setProperty("--highlight-color", "#1C77FF");
   } else {
     modeToggleButton.textContent = "Simple mode";
+    document.body.style.setProperty("--highlight-color", "#FF6F1C");
   }
   buildOptionList();
 });
