@@ -143,11 +143,11 @@ function hidePopup () {
 
 const allOptions: Array<{ format: FileFormat, handler: FormatHandler }> = [];
 
-let supportedFormatCache: Map<string, FileFormat[]> = new Map();
+window.supportedFormatCache = new Map();
 
-function printSupportedFormatCache () {
+window.printSupportedFormatCache = () => {
   const entries = [];
-  for (const entry of supportedFormatCache) {
+  for (const entry of window.supportedFormatCache) {
     entries.push(entry);
   }
   return JSON.stringify(entries, null, 2);
@@ -160,16 +160,15 @@ async function buildOptionList () {
   ui.outputList.innerHTML = "";
 
   for (const handler of handlers) {
-    if (!supportedFormatCache.has(handler.name)) {
+    if (!window.supportedFormatCache.has(handler.name)) {
       console.warn(`Cache miss for formats of handler "${handler.name}".`);
       await handler.init();
       if (handler.supportedFormats) {
-        supportedFormatCache.set(handler.name, handler.supportedFormats);
-        console.log("Updated supported format cache:");
-        console.log(printSupportedFormatCache());
+        window.supportedFormatCache.set(handler.name, handler.supportedFormats);
+        console.info(`Updated supported format cache for "${handler.name}".`);
       }
     }
-    const supportedFormats = supportedFormatCache.get(handler.name);
+    const supportedFormats = window.supportedFormatCache.get(handler.name);
     if (!supportedFormats) {
       console.warn(`Handler "${handler.name}" doesn't support any formats.`);
       continue;
@@ -242,9 +241,15 @@ async function buildOptionList () {
 (async () => {
   try {
     const cacheJSON = await fetch("cache.json").then(r => r.json());
-    supportedFormatCache = new Map(cacheJSON);
+    window.supportedFormatCache = new Map(cacheJSON);
+  } catch {
+    console.warn(
+      "Missing supported format precache.\n\n" +
+      "Consider saving the output of printSupportedFormatCache() to cache.json."
+    );
   } finally {
-    buildOptionList();
+    await buildOptionList();
+    console.log("Built initial format list.");
   }
 })();
 
@@ -271,7 +276,7 @@ async function attemptConvertPath (files: FileData[], path: ConvertPathNode[]) {
       if (!handler.ready) {
         await handler.init();
         if (handler.supportedFormats) {
-          supportedFormatCache.set(handler.name, handler.supportedFormats);
+          window.supportedFormatCache.set(handler.name, handler.supportedFormats);
         }
       }
       files = await handler.doConvert(files, path[i].format, path[i + 1].format);
@@ -302,7 +307,7 @@ async function buildConvertPath (
 
     // Get handlers that support *taking in* the previous node's format
     const validHandlers = handlers.filter(handler => (
-      supportedFormatCache.get(handler.name)?.some(format => (
+      window.supportedFormatCache.get(handler.name)?.some(format => (
         format.mime === previous.format.mime &&
         format.from
       ))
@@ -328,7 +333,7 @@ async function buildConvertPath (
 
     // Look for untested mime types among valid handlers and add to queue
     for (const handler of validHandlers) {
-      const supportedFormats = supportedFormatCache.get(handler.name);
+      const supportedFormats = window.supportedFormatCache.get(handler.name);
       if (!supportedFormats) continue;
       for (const format of supportedFormats) {
         if (!format.to) continue;

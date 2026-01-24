@@ -67,7 +67,7 @@ class FFmpegHandler implements FormatHandler {
     } catch (e) {
       if (!e || (
         typeof e === "string"
-        && e.includes("index out of bounds")
+        && e.includes("out of bounds")
         && attempts > 1
       )) {
         await this.reloadFFmpeg();
