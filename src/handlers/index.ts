@@ -40,6 +40,7 @@ import textToShellHandler from "./texttoshell.ts";
 import batchHandler from "./batch.ts";
 import bsorHandler from "./bsor.ts";
 import fontHandler from "./font.ts";
+import { fromBsonHandler, toBsonHandler } from "./bson.ts";
 
 const handlers: FormatHandler[] = [];
 try { handlers.push(new svgTraceHandler()) } catch (_) { };
@@ -85,5 +86,7 @@ try { handlers.push(new textToShellHandler()) } catch (_) { };
 try { handlers.push(new batchHandler()) } catch (_) { };
 try { handlers.push(new bsorHandler()) } catch (_) { };
 try { handlers.push(new fontHandler()) } catch (_) { };
+try { handlers.push(new fromBsonHandler()) } catch (_) { };
+try { handlers.push(new toBsonHandler()) } catch (_) { };
 
 export default handlers;
